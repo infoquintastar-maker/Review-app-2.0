@@ -1,6 +1,6 @@
 const CACHE = 'review-app-v1';
 const STATIC = ['/', '/manifest.json', '/icon.svg'];
-
+ 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(STATIC)));
   self.skipWaiting();
