@@ -1,0 +1,195 @@
+# Review App — Guía de puesta en marcha
+### Sin terminal. Sin código. Solo clics.
+
+---
+
+## LO QUE TIENES QUE HACER (resumen)
+
+1. Subir estos archivos a GitHub
+2. Conectar GitHub con Vercel (ya lo tienes hecho)
+3. Editar `clients.json` en GitHub con tus datos de GHL
+4. Abrir la URL en tu móvil e instalarla
+
+Total: unos 15 minutos.
+
+---
+
+## PASO 1 — Subir los archivos a GitHub
+
+1. Ve a **github.com** e inicia sesión
+2. Crea un repositorio nuevo:
+   - Clic en el **+** arriba a la derecha → **New repository**
+   - Nombre: `review-app`
+   - Selecciona **Private** (importante: tus API keys estarán aquí)
+   - Clic en **Create repository**
+
+3. En la página del repositorio vacío verás un enlace que dice
+   **"uploading an existing file"** — haz clic en él
+
+4. En tu ordenador, descomprime el ZIP que descargaste.
+   Tendrás una carpeta llamada `review-app`.
+
+5. **Abre esa carpeta** (doble clic para entrar dentro).
+   Verás: `public/`, `api/`, `clients.json`, `vercel.json`, etc.
+
+6. Selecciona TODO lo que hay dentro (Ctrl + A en Windows)
+
+7. **Arrastra** todo eso a la página de GitHub que tienes abierta
+   (la que dice "Drag files here to add them to your repository")
+
+8. GitHub muestra los archivos cargados. Scroll abajo,
+   haz clic en **"Commit changes"** (botón verde)
+
+✅ Los archivos ya están en GitHub.
+Vercel los detecta automáticamente y despliega la app en ~30 segundos.
+
+---
+
+## PASO 2 — Obtener tus credenciales de GoHighLevel
+
+Necesitas dos datos de GHL: la **API Key** y el **Location ID**.
+
+### Obtener la API Key (Private Integration)
+
+1. Entra en tu sub-cuenta de GHL (la que usarás para probar)
+2. Ve a **Settings** → **Private Integrations**
+3. Haz clic en **"+ New"** o **"Create Integration"**
+4. Ponle un nombre: `Review App`
+5. Haz clic en la pestaña **"Scopes"**
+6. Busca **"Contacts"** y activa **Read** y **Write**
+7. Guarda / crea la integración
+8. GHL te mostrará una **API Key** (cadena larga de letras y números)
+   → Cópiala y guárdala en un sitio seguro
+
+### Obtener el Location ID
+
+1. Estando dentro de tu sub-cuenta en GHL,
+   mira la barra de direcciones del navegador
+2. Verás una URL parecida a esta:
+   `https://app.gohighlevel.com/location/AbCdEfGhIj1234/dashboard`
+3. El trozo entre `/location/` y `/dashboard` es tu **Location ID**
+   En el ejemplo: `AbCdEfGhIj1234`
+   → Cópialo
+
+---
+
+## PASO 3 — Poner tus datos en clients.json
+
+Esto es lo más importante. Se hace directamente en GitHub, sin descargar nada.
+
+1. Ve a tu repositorio en github.com
+2. Haz clic en el archivo **`clients.json`**
+3. Haz clic en el icono del **lápiz** (✏️ Edit this file) arriba a la derecha
+4. Verás este contenido:
+
+```json
+{
+  "mi-prueba": {
+    "name": "Mi Prueba",
+    "apiKey": "PON_TU_API_KEY_AQUI",
+    "locationId": "PON_TU_LOCATION_ID_AQUI",
+    "countryCode": "🇪🇸 +34"
+  }
+}
+```
+
+5. Sustituye los valores:
+   - `"Mi Prueba"` → el nombre de tu negocio de prueba (ej: `"QuintaStar Test"`)
+   - `"PON_TU_API_KEY_AQUI"` → la API Key que copiaste en el paso 2
+   - `"PON_TU_LOCATION_ID_AQUI"` → el Location ID que copiaste en el paso 2
+
+6. Haz clic en **"Commit changes"** (botón verde)
+
+Vercel vuelve a desplegar automáticamente en ~30 segundos.
+
+---
+
+## PASO 4 — Probar en tu móvil
+
+1. En Vercel, ve a tu proyecto y copia la URL de tu app
+   (algo como `https://review-app-xxx.vercel.app`)
+
+2. En tu móvil, abre esa URL añadiendo `/mi-prueba` al final:
+   `https://review-app-xxx.vercel.app/mi-prueba`
+
+3. **Android:** El navegador te preguntará "Añadir a pantalla de inicio" → acepta
+   **iPhone:** Pulsa el botón compartir → "Añadir a pantalla de inicio"
+
+4. Entra en la app, escribe tu propio nombre y teléfono, pulsa Enviar
+
+5. Ve a GHL → tu sub-cuenta → **Contacts**
+   → Deberías ver el contacto que acabas de crear
+
+6. Ve a **Automation** → tu workflow → **Enrollment History**
+   → Verifica que se activó el workflow
+
+7. Comprueba que recibes el WhatsApp en tu teléfono ✓
+
+---
+
+## AÑADIR UN CLIENTE NUEVO (para cuando tengas clientes reales)
+
+1. Ve a github.com → tu repo → haz clic en `clients.json` → lápiz (✏️)
+2. Añade una entrada nueva. El archivo quedará así:
+
+```json
+{
+  "mi-prueba": {
+    "name": "Mi Prueba",
+    "apiKey": "tu-api-key-de-prueba",
+    "locationId": "tu-location-id-de-prueba",
+    "countryCode": "🇪🇸 +34"
+  },
+  "panaderia-maria": {
+    "name": "Panadería María",
+    "apiKey": "api-key-de-la-sub-cuenta-de-maria",
+    "locationId": "location-id-de-la-sub-cuenta-de-maria",
+    "countryCode": "🇪🇸 +34"
+  }
+}
+```
+
+3. Haz clic en **"Commit changes"**
+4. En 30 segundos, la URL del cliente ya funciona:
+   `https://tu-app.vercel.app/panaderia-maria`
+
+**Reglas para el nombre del cliente (lo que va antes de los dos puntos):**
+- Solo letras minúsculas, números y guiones
+- Sin espacios, sin tildes, sin ñ
+- Ejemplos válidos: `fontaneria-garcia`, `clinica-dental-lopez`, `bar-el-rincon`
+
+---
+
+## LO QUE LE MANDAS AL CLIENTE (copia y pega)
+
+```
+Hola [Nombre], ya tienes listo tu sistema de reseñas Google ⭐
+
+Para instalarlo en tu móvil:
+1. Abre este enlace: https://TU-APP.vercel.app/NOMBRE-CLIENTE
+2. Te preguntará "Añadir a pantalla de inicio" → pulsa Añadir
+
+Para pedir una reseña: abre la app → escribe nombre y teléfono → pulsa Enviar.
+El WhatsApp se manda solo en segundos.
+
+¿Dudas? Escríbeme.
+```
+
+---
+
+## ESTRUCTURA DE ARCHIVOS (solo para referencia)
+
+```
+review-app/
+├── public/
+│   ├── index.html        ← toda la interfaz de la app
+│   ├── manifest.json     ← hace que se instale como app en el móvil
+│   ├── sw.js             ← permite que funcione sin internet
+│   └── icon.svg          ← icono de la app
+├── api/
+│   ├── client-info.js    ← devuelve el nombre del negocio
+│   └── create-contact.js ← crea el contacto en GHL
+├── clients.json          ← TUS CLIENTES Y SUS API KEYS (editar aquí)
+├── vercel.json           ← configuración de rutas (no tocar)
+└── package.json          ← config del proyecto (no tocar)
+```

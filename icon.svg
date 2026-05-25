@@ -1,0 +1,78 @@
+const path = require('path');
+const fs   = require('fs');
+
+// Load client registry once at cold-start
+let clients = {};
+try {
+  clients = JSON.parse(
+    fs.readFileSync(path.join(process.cwd(), 'clients.json'), 'utf8')
+  );
+} catch (e) {
+  console.warn('clients.json not found or invalid:', e.message);
+}
+
+module.exports = async function handler(req, res) {
+  // CORS preflight
+  res.setHeader('Access-Control-Allow-Origin',  '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const { name, phone, clientId } = req.body || {};
+
+  // Basic validation
+  if (!name || !phone || !clientId) {
+    return res.status(400).json({ error: 'Faltan campos requeridos (name, phone, clientId).' });
+  }
+
+  const client = clients[clientId];
+  if (!client) {
+    return res.status(404).json({ error: 'Cliente no configurado. Contacta con tu proveedor.' });
+  }
+
+  // Resolve API key: prefer environment variable, fall back to clients.json value
+  const envKey = 'GHL_KEY_' + clientId.toUpperCase().replace(/-/g, '_');
+  const apiKey = process.env[envKey] || client.apiKey;
+
+  if (!apiKey || apiKey.startsWith('PON_TU')) {
+    return res.status(500).json({ error: 'API Key no configurada todavía. Edita clients.json.' });
+  }
+
+  // Split full name into first / last
+  const parts     = name.trim().split(/\s+/);
+  const firstName = parts[0];
+  const lastName  = parts.slice(1).join(' ') || '';
+
+  try {
+    // ── Attempt 1: GHL API v2 (free trial & newer accounts) ──────────────
+    const resV2 = await fetch('https://services.leadconnectorhq.com/contacts/', {
+      method:  'POST',
+      headers: {
+        'Authorization': 'Bearer ' + apiKey,
+        'Version':       '2021-07-28',
+        'Content-Type':  'application/json'
+      },
+      body: JSON.stringify({ firstName, lastName, phone, locationId: client.locationId })
+    });
+
+    const dataV2 = await resV2.json();
+
+    if (resV2.ok) {
+      return res.status(200).json({ success: true, contactId: dataV2.contact?.id || null });
+    }
+
+    // ── Attempt 2: GHL API v1 fallback (legacy accounts) ─────────────────
+    const resV1 = await fetch('https://rest.gohighlevel.com/v1/contacts/', {
+      method:  'POST',
+      headers: {
+        'Authorization': 'Bearer ' + apiKey,
+        'Content-Type':  'application/json'
+      },
+      body: JSON.stringify({ firstName, lastName, phone })
+    });
+
+    const
